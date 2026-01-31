@@ -55,10 +55,10 @@ This will:
 
 **Run the complete system:**
 ```bash
-./run.sh your_video.mp4
+./run.sh person_walk.mp4
 ```
 
-Replace `your_video.mp4` with your actual video file path.
+Replace `person_walk.mp4` with your actual video file path.
 
 ## 📁 Project Structure
 
@@ -77,7 +77,7 @@ Replace `your_video.mp4` with your actual video file path.
 
 ## 🔧 Manual Compilation and Execution
 
-### Option 1: Using Makefile (Recommended)
+### Using Makefile (Recommended)
 
 ```bash
 # Compile
@@ -93,7 +93,7 @@ python3 visualizer.py video.mp4
 make clean
 ```
 
-### Option 2: Using CMake
+### Using CMake
 
 ```bash
 # Create build directory
@@ -107,20 +107,6 @@ make
 
 # Run
 ./detector ../video.mp4
-```
-
-### Option 3: Direct Compilation
-
-```bash
-# Compile C++ detector
-g++ -std=c++11 detector.cpp -o detector \
-    `pkg-config --cflags --libs opencv4` -lpthread
-
-# Run detector
-./detector video.mp4
-
-# Run visualizer (in another terminal)
-python3 visualizer.py video.mp4
 ```
 
 ## 📊 How It Works
@@ -178,40 +164,33 @@ Generated using:
 ```cpp
 key_t key = ftok("detector.cpp", 65);
 ```
-
 Both C++ and Python must use the same key to communicate.
 
-## 🐛 Troubleshooting
 
-### Issue: "Cannot open video file"
-**Solution:** Verify video file path and format. Supported: mp4, avi, mov
 
-### Issue: "Failed to create shared memory"
-**Solution:** Clean up existing shared memory:
-```bash
-ipcs -m | grep $(whoami) | awk '{print $2}' | xargs -I {} ipcrm -m {}
-```
+## Results 
 
-### Issue: "Cannot connect to shared memory" (Python)
-**Solution:** Ensure C++ detector is running first and created shared memory
+## Input Video
 
-### Issue: YOLO weights not found
-**Solution:** Re-run setup script:
-```bash
-./setup.sh
-```
+https://github.com/person_walk.mp4
 
-### Issue: Low detection accuracy
-**Solution:** Adjust `confThreshold` in detector.cpp (try 0.3-0.7)
+## Output Video
 
-### Issue: Too many false positives
-**Solution:** Increase `confThreshold` or adjust `nmsThreshold`
+https://github.com/output_detected.mp4
+
+
+<img width="1920" height="1023" alt="Screenshot (145)" src="https://github.com/user-attachments/assets/373ca8fa-0ddf-49c5-b0e7-f75636e3d89d" /> 
+
+<img width="1920" height="1023" alt="Screenshot (144)" src="https://github.com/user-attachments/assets/57ef60cf-1163-4fd4-8c7f-35c42c3fd96f" />
+
+<img width="1920" height="1028" alt="Screenshot (141)" src="https://github.com/user-attachments/assets/c603105b-2b29-4dac-a7ea-abb61eb3172d" />
+
+
 
 ## 📊 Performance Notes
 
 - **Processing Speed:** ~1-5 FPS on CPU (depends on video resolution)
 - **Memory Usage:** ~500MB for YOLO model + video processing
-- **GPU Acceleration:** Not enabled (can be added by changing DNN backend)
 
 ## 🔍 Understanding the Output
 
@@ -221,16 +200,6 @@ The visualizer displays:
 - **Frame info:** Current frame number and detection count
 - **Output file:** `output_detected.mp4` with all visualizations
 
-## 📈 Improvements and Extensions
-
-Possible enhancements:
-1. Add GPU support (CUDA) for faster processing
-2. Track persons across frames (add tracking ID)
-3. Count persons entering/exiting frame
-4. Add signal handling for proper cleanup
-5. Support multiple video formats
-6. Real-time processing with camera input
-7. Multi-threaded processing
 
 ## 🔐 Shared Memory Management
 
@@ -249,28 +218,6 @@ ipcrm -m <shmid>
 ipcs -m | grep $(whoami) | awk '{print $2}' | xargs -I {} ipcrm -m {}
 ```
 
-## 📝 Code Explanation
-
-### Key C++ Components
-
-1. **YOLO Model Loading:**
-```cpp
-Net net = readNetFromDarknet("yolov3.cfg", "yolov3.weights");
-```
-
-2. **Shared Memory Creation:**
-```cpp
-key_t key = ftok("detector.cpp", 65);
-int shmid = shmget(key, sizeof(DetectionData), 0666 | IPC_CREAT);
-DetectionData* sharedData = (DetectionData*)shmat(shmid, NULL, 0);
-```
-
-3. **Detection Loop:**
-```cpp
-blobFromImage(frame, blob, 1/255.0, Size(416, 416), ...);
-net.forward(outs, outNames);
-// Process outputs and apply NMS
-```
 
 ### Key Python Components
 
@@ -293,17 +240,13 @@ cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 ## 📚 Dependencies
 
 ### C++ Libraries
-- OpenCV 4.x (with DNN module)
-- System V IPC (built-in)
+- OpenCV
+- System V IPC 
 
 ### Python Libraries
 - opencv-python
 - numpy
 - sysv-ipc
-
-## ⚖️ License
-
-This is an educational project for assignment purposes.
 
 ## 🤝 Assignment Requirements Met
 
@@ -315,15 +258,3 @@ This is an educational project for assignment purposes.
 ✅ Signal-based communication (completion flag)  
 ✅ WSL compatibility  
 
-## 📞 Support
-
-If you encounter issues:
-1. Check video file format and path
-2. Verify all dependencies are installed
-3. Clean shared memory before running
-4. Check YOLO model files are downloaded
-5. Review error messages in terminal
-
----
-
-**Happy Detecting! 🎥👤**
